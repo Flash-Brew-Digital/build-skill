@@ -1,6 +1,6 @@
 {
   "name": "build-skill",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Scaffold AI agent skills quickly with the Build Skill CLI.",
   "keywords": [
     "ai",
