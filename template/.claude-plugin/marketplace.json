@@ -1,0 +1,29 @@
+{
+  "name": "{Brand_Name}-skills",
+  "description": "{Brand_Name} agent skills",
+  "owner": {
+    "name": "{Creator_Name}",
+    "email": "{Creator_Email}"
+  },
+  "metadata": {
+    "version": "1.0.0",
+    "description": "Claude Code marketplace of skills by {Brand_Name}"
+  },
+  "plugins": [
+    {
+      "name": "{Skill_Name}-skill",
+      "description": "{Skill_Description}",
+      "version": "1.0.0",
+      "author": {
+        "name": "{Creator_Name}",
+        "email": "{Creator_Email}"
+      },
+      "source": "./skills/{Skill_Name}",
+      "homepage": "{Skill_Homepage}",
+      "repository": "https://github.com/{Skill_Repository}",
+      "license": "{Skill_License}",
+      "category": "{Skill_Category}",
+      "keywords": "{Skill_Keywords}"
+    }
+  ]
+}
