@@ -179,4 +179,4 @@ Contributions are welcome! Please read our [Contributing Guide](.github/CONTRIBU
 
 ## Author
 
-[Ben Sabic](https://bensabic.ca) at [Flash Brew Digital](https://flashbrew.digital)
+[Ben Sabic](https://bensabic.dev) at [Flash Brew Digital](https://flashbrew.digital)

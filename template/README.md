@@ -44,6 +44,8 @@ Install via Claude Code's plugin system:
 /plugin install {Skill_Name}-skill
 ```
 
+> Claude Code plugins are also supported in Factory's [Droid](https://docs.factory.ai/cli/configuration/plugins#claude-code-compatibility).
+
 ## Adding New Skills
 
 Use the included script to add new skills:
