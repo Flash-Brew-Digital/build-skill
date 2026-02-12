@@ -153,7 +153,9 @@ function generateReadmeSkillsList(skills) {
 
   for (const skill of skills) {
     const escapedDesc = truncate(skill.description).replace(/\|/g, "\\|");
-    lines.push(`| [${skill.name}](./skills/${skill.dirName}) | ${escapedDesc} |`);
+    lines.push(
+      `| [${skill.name}](./skills/${skill.dirName}) | ${escapedDesc} |`
+    );
   }
 
   lines.push("");
@@ -218,7 +220,12 @@ async function updatePluginJson(skills) {
   let updated = 0;
 
   for (const skill of skills) {
-    const pluginJsonPath = join(SKILLS_DIR, skill.dirName, ".claude-plugin", "plugin.json");
+    const pluginJsonPath = join(
+      SKILLS_DIR,
+      skill.dirName,
+      ".claude-plugin",
+      "plugin.json"
+    );
 
     let pluginJson;
     try {
@@ -247,7 +254,11 @@ async function updatePluginJson(skills) {
     }
 
     if (changed) {
-      await writeFile(pluginJsonPath, `${JSON.stringify(pluginJson, null, 2)}\n`, "utf-8");
+      await writeFile(
+        pluginJsonPath,
+        `${JSON.stringify(pluginJson, null, 2)}\n`,
+        "utf-8"
+      );
       updated++;
     }
   }

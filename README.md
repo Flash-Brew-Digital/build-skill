@@ -89,6 +89,7 @@ npx build-skill --name my-skill --description "My skill" --force --quiet
 │   └── workflows/
 │       └── process-skills.yml
 ├── scripts/
+│   ├── add-skill.js
 │   └── sync-skills.js
 ├── skills/
 │   └── <skill-name>/
@@ -105,7 +106,7 @@ npx build-skill --name my-skill --description "My skill" --force --quiet
 The generated repository includes a `process-skills.yml` workflow that:
 
 - **On Pull Requests**: Validates all skills using the [Validate Agent Skill](https://github.com/marketplace/actions/validate-skill) action
-- **On Push to Main**: Validates skills and syncs the README and marketplace.json
+- **On Push to Main**: Validates skills and syncs the README, marketplace.json, and each skill's plugin.json
 
 ### Add Skill Script
 
@@ -166,8 +167,10 @@ pnpm type-check
 ## Resources
 
 - [Agent Skills Specification](https://agentskills.io/specification)
-- [Vercel Skills CLI](https://skills.sh/)
+- [npx skills](https://skills.sh/)
 - [Validate Agent Skill](https://github.com/marketplace/actions/validate-skill)
+- [Playbooks](https://playbooks.com/skills)
+- [Context7 Skills](https://context7.com/docs/skills)
 
 ## Contributing
 
@@ -175,7 +178,7 @@ Contributions are welcome! Please read our [Contributing Guide](.github/CONTRIBU
 
 ## License
 
-[MIT License](LICENSE.md)
+[MIT License](LICENSE)
 
 ## Author
 

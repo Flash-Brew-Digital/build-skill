@@ -17,9 +17,9 @@ Agent Skills are folders of instructions, scripts, and resources that agents can
 
 ## Installation
 
-### Option 1: Skills (Recommended)
+### Skills
 
-Use the [Vercel Skills CLI](https://skills.sh/) to install skills directly:
+Use [npx skills](https://skills.sh/) to install skills directly:
 
 ```bash
 # Install all skills
@@ -32,7 +32,7 @@ npx skills add {Brand_Name}/agent-skills --skill {Skill_Name}
 npx skills add {Brand_Name}/agent-skills --list
 ```
 
-### Option 2: Claude Code Plugin
+### Claude Code Plugin
 
 Install via Claude Code's plugin system:
 
@@ -45,6 +45,18 @@ Install via Claude Code's plugin system:
 ```
 
 > Claude Code plugins are also supported in Factory's [Droid](https://docs.factory.ai/cli/configuration/plugins#claude-code-compatibility).
+
+### Other Installation Methods
+
+Agent skills can also be installed by using the below commands from [Playbooks](https://playbooks.com/skills) or [Context7](https://context7.com/docs/skills):
+
+```bash
+# Playbooks
+npx playbooks add skill {Brand_Name}/agent-skills
+
+# Context7
+npx ctx7 skills install /{Brand_Name}/agent-skills
+```
 
 ## Adding New Skills
 
