@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/Flash-Brew-Digital/build-skill/compare/v1.1.0...v1.2.0) (2026-02-12)
+
+
+### Features
+
+* add project documentation, lint-staged, and update resources ([952eb3b](https://github.com/Flash-Brew-Digital/build-skill/commit/952eb3b4dd1225b09a6a611951b3987cb1dea022))
+
 ## [1.1.0](https://github.com/Flash-Brew-Digital/build-skill/compare/v1.0.0...v1.1.0) (2026-02-10)
 
 
