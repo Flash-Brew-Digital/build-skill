@@ -3,13 +3,16 @@
 ![Flash Brew Digital OSS](https://img.shields.io/badge/Flash_Brew_Digital-OSS-6F4E37?style=for-the-badge&labelColor=E9E3DD)
 ![MIT License](https://img.shields.io/badge/License-MIT-6F4E37?style=for-the-badge&labelColor=E9E3DD)
 
-Scaffold AI agent skills quickly with the Build Skill CLI. Creates a fully-configured skills repository following the [Agent Skills Specification](https://agentskills.io/specification).
+[![NPM Version](https://img.shields.io/npm/v/build-skill?registry_uri=https%3A%2F%2Fregistry.npmjs.com&style=for-the-badge&logo=npm&labelColor=%23000&color=%23000)](https://www.npmjs.com/package/build-skill)
+[![NPM Downloads](https://img.shields.io/npm/dy/build-skill?style=for-the-badge&logo=npm&labelColor=%23000&color=%23000)](https://www.npmjs.com/package/build-skill)
+
+Scaffold AI agent skills quickly with **npx build-skill**. Creates a fully-configured skills repository following the [Agent Skills Specification](https://agentskills.io/specification).
 
 <img width="2160" height="1400" fetchpriority="high" alt="Terminal screen showing an example output for when you run npx build-skill and create your agent skill" src="https://github.com/user-attachments/assets/3d8ce277-4c07-4219-9328-f924c69e625d" />
 
 ## What are Agent Skills?
 
-Agent Skills are folders of instructions, scripts, and resources that agents can discover and use to do things more accurately and efficiently. They work across any AI agent that supports the [open Agent Skills standard](https://agentskills.io).
+Agent Skills are folders of instructions, scripts, and resources that agents can discover and use to do things more accurately and efficiently. They work across any AI agent that supports the open Agent Skills standard.
 
 ## Quick Start
 
@@ -144,33 +147,16 @@ This script:
 
 Run it after modifying skills to keep everything up to date.
 
-## Development
-
-```bash
-# Install dependencies
-pnpm install
-
-# Build
-pnpm build
-
-# Run tests
-pnpm test
-
-# Lint
-pnpm check
-
-# Fix lint issues
-pnpm fix
-
-# Type check
-pnpm type-check
-```
-
 ## Resources
 
+**General**
+
 - [Agent Skills Specification](https://agentskills.io/specification)
-- [npx skills](https://skills.sh/)
 - [Validate Agent Skill](https://github.com/marketplace/actions/validate-skill)
+- [Why Use Build Skill?](https://dev.to/bensabic/i-built-npx-build-skill-heres-why-you-should-use-it-2ag6)
+
+**Find and Install Agent Skills**
+- [npx skills](https://skills.sh/)
 - [Playbooks](https://playbooks.com/skills)
 - [Context7 Skills](https://context7.com/docs/skills)
 
