@@ -5,6 +5,8 @@
 
 Scaffold AI agent skills quickly with the Build Skill CLI. Creates a fully-configured skills repository following the [Agent Skills Specification](https://agentskills.io/specification).
 
+<img width="2160" height="1400" fetchpriority="high" alt="Terminal screen showing an example output for when you run npx build-skill and create your agent skill" src="https://github.com/user-attachments/assets/3d8ce277-4c07-4219-9328-f924c69e625d" />
+
 ## What are Agent Skills?
 
 Agent Skills are folders of instructions, scripts, and resources that agents can discover and use to do things more accurately and efficiently. They work across any AI agent that supports the [open Agent Skills standard](https://agentskills.io).
