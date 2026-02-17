@@ -37,7 +37,6 @@ async function main() {
     .option("-l, --license <license>", "License for the skill")
     .option("-w, --website <url>", "Website URL (e.g. docs) for the skill")
     .option("-r, --repository <repo>", "GitHub repository (owner/repo)")
-    .option("-c, --category <category>", "Skill category")
     .option("-k, --keywords <keywords>", "Comma-separated keywords")
     .option("-o, --output <dir>", "Output directory", ".")
     .option("-q, --quiet", "Suppress interactive prompts and visual output")
@@ -81,8 +80,9 @@ async function main() {
     Skill_License: options.license || "MIT",
     Skill_Homepage: options.website || "https://example.com",
     Skill_Repository: options.repository || `${brandName}/agent-skills`,
-    Skill_Category: options.category || "general",
-    Skill_Keywords: options.keywords || "ai, agent, skill",
+    Skill_Keywords: JSON.stringify(
+      (options.keywords || "ai, agent, skill").split(",").map((k) => k.trim())
+    ),
   };
 
   await createSkillRepository(

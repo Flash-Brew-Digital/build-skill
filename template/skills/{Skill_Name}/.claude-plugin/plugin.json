@@ -9,6 +9,5 @@
   "license": "{Skill_License}",
   "homepage": "{Skill_Homepage}",
   "repository": "https://github.com/{Skill_Repository}",
-  "keywords": "{Skill_Keywords}",
-  "category": "{Skill_Category}"
+  "keywords": "{Skill_Keywords}"
 }

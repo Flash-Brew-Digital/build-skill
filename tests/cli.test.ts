@@ -295,34 +295,6 @@ describe("CLI integration", () => {
     expect(pluginJson).toContain("myorg/myrepo");
   });
 
-  it("applies custom category", async () => {
-    await execa("node", [
-      CLI_PATH,
-      "--name",
-      "test",
-      "--description",
-      "desc",
-      "--category",
-      "productivity",
-      "--quiet",
-      "--output",
-      TEST_DIR,
-    ]);
-
-    const pluginJson = await readFile(
-      join(
-        TEST_DIR,
-        "test-skills",
-        "skills",
-        "test",
-        ".claude-plugin",
-        "plugin.json"
-      ),
-      "utf-8"
-    );
-    expect(pluginJson).toContain("productivity");
-  });
-
   it("applies custom keywords", async () => {
     await execa("node", [
       CLI_PATH,
@@ -348,7 +320,7 @@ describe("CLI integration", () => {
       ),
       "utf-8"
     );
-    expect(pluginJson).toContain("custom, keywords, here");
+    expect(pluginJson).toContain('"custom","keywords","here"');
   });
 
   it("normalizes name with spaces", async () => {

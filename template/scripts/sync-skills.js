@@ -123,8 +123,7 @@ async function discoverSkills() {
         author: pluginJson.author || {},
         homepage: pluginJson.homepage || "",
         repository: pluginJson.repository || "",
-        category: pluginJson.category || "general",
-        keywords: pluginJson.keywords || "",
+        keywords: pluginJson.keywords || [],
       });
     } catch (error) {
       console.warn(
@@ -204,7 +203,6 @@ async function updateMarketplace(skills) {
     homepage: skill.homepage,
     repository: skill.repository,
     license: skill.license,
-    category: skill.category,
     keywords: skill.keywords,
   }));
 

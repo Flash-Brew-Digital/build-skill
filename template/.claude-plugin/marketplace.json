@@ -22,7 +22,6 @@
       "homepage": "{Skill_Homepage}",
       "repository": "https://github.com/{Skill_Repository}",
       "license": "{Skill_License}",
-      "category": "{Skill_Category}",
       "keywords": "{Skill_Keywords}"
     }
   ]

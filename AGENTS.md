@@ -35,8 +35,15 @@ Write code that is **accessible, performant, type-safe, and maintainable**. Focu
 - `async/await` over promise chains; always `await` promises in async functions
 - Throw `Error` objects with descriptive messages, not strings
 
+## Development
+
+- **Always use conventional commit prefixes** (e.g. `feat:`). Release-please relies on these to generate changelogs and trigger releases, commits without one will be silently ignored.
+- **Never force push, amend, or rewrite history** unless the user explicitly requests it and confirms. Force pushes can break release tracking and cause data loss.
+- **Never push to `main` directly** unless the user explicitly asks. Default to creating a feature branch and opening a PR.
+- **Run `pnpm build && pnpm test && pnpm check` before committing** to catch build, test, and lint failures early.
+
 ## Resources
 
 [ARCHITECTURE.md](./ARCHITECTURE.md): Detailed Project Architecture
-[CONTRIBUTING.md](./CONTRIBUTING.md): Project Contribution Guidelines
+[CONTRIBUTING.md](.github/CONTRIBUTING.md): Project Contribution Guidelines
 [Agent Skills Specification](https://agentskills.io/specification.md): Latest Agent Skills Specification

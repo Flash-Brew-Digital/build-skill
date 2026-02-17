@@ -26,8 +26,7 @@ function createTestValues(
     Skill_License: "MIT",
     Skill_Homepage: "https://example.com",
     Skill_Repository: "test/repo",
-    Skill_Category: "general",
-    Skill_Keywords: "test",
+    Skill_Keywords: '["test"]',
     ...overrides,
   };
 }
@@ -364,7 +363,6 @@ describe("replaceInFile edge cases", () => {
         "License: {Skill_License}",
         "Homepage: {Skill_Homepage}",
         "Repo: {Skill_Repository}",
-        "Category: {Skill_Category}",
         "Keywords: {Skill_Keywords}",
       ].join("\n")
     );
@@ -375,7 +373,7 @@ describe("replaceInFile edge cases", () => {
       Skill_Description: "A skill",
       Creator_Name: "John Doe",
       Creator_Email: "john@example.com",
-      Skill_Keywords: "test, demo",
+      Skill_Keywords: '["test", "demo"]',
     });
     await replaceInFile(filePath, values);
 
@@ -390,10 +388,35 @@ describe("replaceInFile edge cases", () => {
         "License: MIT",
         "Homepage: https://example.com",
         "Repo: test/repo",
-        "Category: general",
-        "Keywords: test, demo",
+        'Keywords: ["test", "demo"]',
       ].join("\n")
     );
+  });
+
+  it("replaces quoted array placeholders in JSON files", async () => {
+    const filePath = join(SRC_DIR, "test.json");
+    await writeFile(
+      filePath,
+      JSON.stringify(
+        {
+          name: "{Skill_Name}",
+          keywords: "{Skill_Keywords}",
+        },
+        null,
+        2
+      )
+    );
+
+    const values = createTestValues({
+      Skill_Name: "my-skill",
+      Skill_Keywords: '["ai", "agent"]',
+    });
+    await replaceInFile(filePath, values);
+
+    const content = await readFile(filePath, "utf-8");
+    const parsed = JSON.parse(content);
+    expect(parsed.name).toBe("my-skill");
+    expect(parsed.keywords).toEqual(["ai", "agent"]);
   });
 });
 

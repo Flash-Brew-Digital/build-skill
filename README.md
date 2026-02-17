@@ -51,7 +51,6 @@ npx build-skill --name my-skill --description "Helps with X tasks" --quiet
 | `--license <license>` | `-l` | License for the skill | `MIT` |
 | `--website <url>` | `-w` | Website/docs URL | `https://example.com` |
 | `--repository <repo>` | `-r` | GitHub repository (owner/repo) | `<brand>/agent-skills` |
-| `--category <category>` | `-c` | Skill category | `general` |
 | `--keywords <keywords>` | `-k` | Comma-separated keywords | `ai, agent, skill` |
 | `--output <dir>` | `-o` | Output directory | `.` |
 | `--quiet` | `-q` | Suppress prompts and visual output | `false` |
@@ -76,7 +75,6 @@ npx build-skill \
   --license Apache-2.0 \
   --website https://acme.example.com/docs \
   --repository acme-corp/agent-skills \
-  --category productivity \
   --keywords "data, csv, json, processing" \
   --quiet
 

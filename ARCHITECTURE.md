@@ -88,8 +88,7 @@ Template files use `{Key}` placeholders that map to the `TemplateValues` interfa
 | `{Skill_License}` | `MIT` |
 | `{Skill_Homepage}` | `https://acme.example.com` |
 | `{Skill_Repository}` | `acme-corp/agent-skills` |
-| `{Skill_Category}` | `productivity` |
-| `{Skill_Keywords}` | `data, csv, json` |
+| `{Skill_Keywords}` | `["data", "csv", "json"]` |
 
 ## Generated Repository Automation
 

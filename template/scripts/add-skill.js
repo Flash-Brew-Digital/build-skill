@@ -98,8 +98,7 @@ function generatePluginJson(skillName, description, marketplace) {
       license: existingPlugin.license || "MIT",
       homepage: existingPlugin.homepage || "https://example.com",
       repository: existingPlugin.repository || "",
-      keywords: existingPlugin.keywords || "ai, agent, skill",
-      category: existingPlugin.category || "general",
+      keywords: existingPlugin.keywords || [],
     },
     null,
     2

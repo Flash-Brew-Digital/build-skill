@@ -48,6 +48,13 @@ export async function replaceInFile(
 
   for (const [key, value] of Object.entries(values)) {
     const placeholder = `{${key}}`;
+
+    // When the value is a JSON array, replace the quoted placeholder
+    // (e.g. "{Skill_Keywords}") with the raw array so the output is valid JSON
+    if (value.startsWith("[")) {
+      content = content.replaceAll(`"${placeholder}"`, value);
+    }
+
     content = content.replaceAll(placeholder, value);
   }
 

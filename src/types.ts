@@ -5,7 +5,6 @@ export interface CliOptions {
   license?: string;
   website?: string;
   repository?: string;
-  category?: string;
   keywords?: string;
   output?: string;
   quiet?: boolean;
@@ -21,7 +20,6 @@ export interface TemplateValues {
   Skill_License: string;
   Skill_Homepage: string;
   Skill_Repository: string;
-  Skill_Category: string;
   Skill_Keywords: string;
 }
 
