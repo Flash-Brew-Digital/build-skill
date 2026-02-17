@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/Flash-Brew-Digital/build-skill/compare/v1.2.0...v1.3.0) (2026-02-17)
+
+
+### Features
+
+* make keywords a JSON array and remove category ([d747b14](https://github.com/Flash-Brew-Digital/build-skill/commit/d747b14c882a7bb65c63e75b1d6c8a89ab02eb6c))
+
 ## [1.2.0](https://github.com/Flash-Brew-Digital/build-skill/compare/v1.1.0...v1.2.0) (2026-02-12)
 
 
