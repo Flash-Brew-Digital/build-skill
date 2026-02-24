@@ -84,6 +84,8 @@ describe("CLI integration", () => {
     expect(entries).toContain("scripts");
     expect(entries).toContain("README.md");
     expect(entries).toContain(".claude-plugin");
+    expect(entries).toContain(".cursor-plugin");
+    expect(entries).toContain("manifest.json");
   });
 
   it("replaces placeholders in generated files", async () => {
@@ -226,14 +228,7 @@ describe("CLI integration", () => {
     ]);
 
     const pluginJson = await readFile(
-      join(
-        TEST_DIR,
-        "test-skills",
-        "skills",
-        "test",
-        ".claude-plugin",
-        "plugin.json"
-      ),
+      join(TEST_DIR, "test-skills", ".claude-plugin", "plugin.json"),
       "utf-8"
     );
     expect(pluginJson).toContain("Apache-2.0");
@@ -254,14 +249,7 @@ describe("CLI integration", () => {
     ]);
 
     const pluginJson = await readFile(
-      join(
-        TEST_DIR,
-        "test-skills",
-        "skills",
-        "test",
-        ".claude-plugin",
-        "plugin.json"
-      ),
+      join(TEST_DIR, "test-skills", ".claude-plugin", "plugin.json"),
       "utf-8"
     );
     expect(pluginJson).toContain("https://custom.example.com");
@@ -282,14 +270,7 @@ describe("CLI integration", () => {
     ]);
 
     const pluginJson = await readFile(
-      join(
-        TEST_DIR,
-        "test-skills",
-        "skills",
-        "test",
-        ".claude-plugin",
-        "plugin.json"
-      ),
+      join(TEST_DIR, "test-skills", ".claude-plugin", "plugin.json"),
       "utf-8"
     );
     expect(pluginJson).toContain("myorg/myrepo");
@@ -310,14 +291,7 @@ describe("CLI integration", () => {
     ]);
 
     const pluginJson = await readFile(
-      join(
-        TEST_DIR,
-        "test-skills",
-        "skills",
-        "test",
-        ".claude-plugin",
-        "plugin.json"
-      ),
+      join(TEST_DIR, "test-skills", ".claude-plugin", "plugin.json"),
       "utf-8"
     );
     expect(pluginJson).toContain('"custom","keywords","here"');
@@ -366,5 +340,92 @@ describe("CLI integration", () => {
     expect(stdout).toContain("build-skill");
     expect(stdout).toContain("--name");
     expect(stdout).toContain("--description");
+  });
+
+  it("creates manifest.json with correct values", async () => {
+    await execa("node", [
+      CLI_PATH,
+      "--brand",
+      "acme",
+      "--name",
+      "my-skill",
+      "--description",
+      "My awesome skill",
+      "--license",
+      "Apache-2.0",
+      "--repository",
+      "acme/skills",
+      "--quiet",
+      "--output",
+      TEST_DIR,
+    ]);
+
+    const targetDir = join(TEST_DIR, "acme-skills");
+    const manifest = JSON.parse(
+      await readFile(join(targetDir, "manifest.json"), "utf-8")
+    );
+
+    expect(manifest.name).toBe("acme-agent-skills");
+    expect(manifest.license).toBe("Apache-2.0");
+    expect(manifest.repository).toBe("https://github.com/acme/skills");
+    expect(manifest.skills).toHaveLength(1);
+    expect(manifest.skills[0].name).toBe("my-skill");
+    expect(manifest.skills[0].description).toBe("My awesome skill");
+  });
+
+  it("creates skills/index.json", async () => {
+    await execa("node", [
+      CLI_PATH,
+      "--brand",
+      "acme",
+      "--name",
+      "my-skill",
+      "--description",
+      "My awesome skill",
+      "--quiet",
+      "--output",
+      TEST_DIR,
+    ]);
+
+    const targetDir = join(TEST_DIR, "acme-skills");
+    const index = JSON.parse(
+      await readFile(join(targetDir, "skills", "index.json"), "utf-8")
+    );
+
+    expect(index.skills).toHaveLength(1);
+    expect(index.skills[0].name).toBe("my-skill");
+    expect(index.skills[0].description).toBe("My awesome skill");
+    expect(index.skills[0].files).toContain("SKILL.md");
+  });
+
+  it("creates cursor plugin directory", async () => {
+    await execa("node", [
+      CLI_PATH,
+      "--brand",
+      "acme",
+      "--name",
+      "my-skill",
+      "--description",
+      "My awesome skill",
+      "--website",
+      "https://acme.com",
+      "--quiet",
+      "--output",
+      TEST_DIR,
+    ]);
+
+    const targetDir = join(TEST_DIR, "acme-skills");
+    const cursorPlugin = JSON.parse(
+      await readFile(join(targetDir, ".cursor-plugin", "plugin.json"), "utf-8")
+    );
+
+    expect(cursorPlugin.name).toBe("acme-agent-skills");
+    expect(cursorPlugin.homepage).toBe("https://acme.com");
+    expect(cursorPlugin.skills).toBe("./skills/");
+
+    // Schema file should exist
+    expect(
+      await pathExists(join(targetDir, ".cursor-plugin", "plugin.schema.json"))
+    ).toBe(true);
   });
 });

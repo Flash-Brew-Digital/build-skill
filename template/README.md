@@ -19,7 +19,7 @@ Agent Skills are folders of instructions, scripts, and resources that agents can
 
 ### Skills
 
-Use [npx skills](https://skills.sh/) to install skills directly:
+Use [skills](https://skills.sh/) to install skills directly:
 
 ```bash
 # Install all skills
@@ -37,11 +37,8 @@ npx skills add {Brand_Name}/agent-skills --list
 Install via Claude Code's plugin system:
 
 ```bash
-# Add the marketplace
-/plugin marketplace add {Brand_Name}/agent-skills
-
-# Install specific skill
-/plugin install {Skill_Name}-skill
+# Add the plugin (includes all skills)
+/plugin add {Brand_Name}/agent-skills
 ```
 
 > Claude Code plugins are also supported in Factory's [Droid](https://docs.factory.ai/cli/configuration/plugins#claude-code-compatibility).
@@ -72,21 +69,26 @@ Example:
 node scripts/add-skill.js {Skill_Name} "{Skill_Description}"
 ```
 
-This will create the skill structure and automatically update this README and the marketplace.json.
+This will create the skill structure and automatically update manifest.json, platform plugin files, skills/index.json, and this README.
 
 ## Scripts
 
 | Script | Description |
 | ------ | ----------- |
 | `node scripts/add-skill.js` | Add a new skill to the repository |
-| `node scripts/sync-skills.js` | Sync README and marketplace.json with skills directory |
+| `node scripts/sync-skills.js` | Sync manifest.json, platform plugin files, skills/index.json, and README with skills directory |
+
+## Resources
+
+- [Agent Skills Specification](https://agentskills.io/specification)
+- [npx skills](https://skills.sh/)
+- [Validate Agent Skill](https://github.com/marketplace/actions/validate-skill)
+- [Playbooks](https://playbooks.com/skills)
+- [Context7 Skills](https://context7.com/docs/skills)
 
 ## Contributing
 
-1. Fork this repository
-2. Create a new skill using `node scripts/add-skill.js`
-3. Edit the skill's `SKILL.md` with your content
-4. Submit a pull request
+Contributions are welcome! Please read our [Contributing Guide](.github/CONTRIBUTING.md) for more information.
 
 ## License
 

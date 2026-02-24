@@ -1,0 +1,9 @@
+{
+  "skills": [
+    {
+      "name": "{Skill_Name}",
+      "description": "{Skill_Description}",
+      "files": ["SKILL.md"]
+    }
+  ]
+}

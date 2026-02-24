@@ -4,8 +4,10 @@ import {
   mkdir,
   readdir,
   readFile,
+  readlink,
   rename,
   rm,
+  symlink,
   writeFile,
 } from "node:fs/promises";
 import { join } from "node:path";
@@ -32,7 +34,10 @@ export async function copyDir(src: string, dest: string): Promise<void> {
     const srcPath = join(src, entry.name);
     const destPath = join(dest, entry.name);
 
-    if (entry.isDirectory()) {
+    if (entry.isSymbolicLink()) {
+      const target = await readlink(srcPath);
+      await symlink(target, destPath);
+    } else if (entry.isDirectory()) {
       await copyDir(srcPath, destPath);
     } else {
       await cp(srcPath, destPath);
@@ -70,7 +75,9 @@ export async function processDirectory(
   for (const entry of entries) {
     const fullPath = join(dir, entry.name);
 
-    if (entry.isDirectory()) {
+    if (entry.isSymbolicLink()) {
+      // Symlinks are preserved as-is (target already copied)
+    } else if (entry.isDirectory()) {
       if (entry.name === SKILL_NAME_PLACEHOLDER) {
         const newPath = join(dir, values.Skill_Name);
         await rename(fullPath, newPath);

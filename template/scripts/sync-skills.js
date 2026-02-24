@@ -1,15 +1,20 @@
 #!/usr/bin/env node
 
 /**
- * sync-skills.js
+ * @module sync-skills
+ * @description Discovers skills in the skills/ directory and syncs their metadata
+ * across all generated files: manifest.json, platform plugin configs
+ * (.claude-plugin/plugin.json, .cursor-plugin/plugin.json),
+ * .claude-plugin/marketplace.json, skills/index.json, and README.md.
  *
- * Syncs the Available Skills section in README.md and the plugins array
- * in .claude-plugin/marketplace.json with the actual skills in skills/
- *
- * Usage: node scripts/sync-skills.js
+ * Also propagates author and repository from manifest.json into each
+ * skill's SKILL.md frontmatter.
+ * @example
+ * // Run from the repository root
+ * node scripts/sync-skills.js
  */
 
-import { readdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -17,13 +22,32 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = join(__dirname, "..");
 const SKILLS_DIR = join(ROOT_DIR, "skills");
 const README_PATH = join(ROOT_DIR, "README.md");
-const MARKETPLACE_PATH = join(ROOT_DIR, ".claude-plugin", "marketplace.json");
+const MANIFEST_PATH = join(ROOT_DIR, "manifest.json");
+const CLAUDE_MARKETPLACE_PATH = join(
+  ROOT_DIR,
+  ".claude-plugin",
+  "marketplace.json"
+);
+const CLAUDE_PLUGIN_PATH = join(ROOT_DIR, ".claude-plugin", "plugin.json");
+const CURSOR_PLUGIN_PATH = join(ROOT_DIR, ".cursor-plugin", "plugin.json");
+const INDEX_PATH = join(SKILLS_DIR, "index.json");
 
 const FRONTMATTER_REGEX = /^---\n([\s\S]*?)\n---/;
 const WHITESPACE_REGEX = /\S/;
+const AUTHOR_REGEX = /^( {2}author:) .+$/m;
+const REPOSITORY_REGEX = /^ {2}repository: .+$/m;
+const REPOSITORY_CAPTURE_REGEX = /^( {2}repository:) .+$/m;
+const AUTHOR_LINE_REGEX = /^( {2}author: .+)$/m;
 
 function parseValue(raw) {
   const trimmed = raw.trim();
+  if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+    try {
+      return JSON.parse(trimmed);
+    } catch {
+      return trimmed;
+    }
+  }
   if (
     (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
     (trimmed.startsWith("'") && trimmed.endsWith("'"))
@@ -58,16 +82,13 @@ function parseFrontmatter(content) {
     const rawValue = line.slice(colonIndex + 1);
 
     if (indent > 0 && currentObject !== null) {
-      // Nested property
       const value = parseValue(rawValue);
       if (value !== "") {
         currentObject[key] = value;
       }
     } else {
-      // Top-level property
       const value = parseValue(rawValue);
       if (value === "") {
-        // Start of a nested object
         currentObject = {};
         result[key] = currentObject;
       } else {
@@ -80,6 +101,8 @@ function parseFrontmatter(content) {
   return result;
 }
 
+// Scans the skills/ directory for subdirectories containing a SKILL.md,
+// parses each file's frontmatter, and returns a sorted array of skill metadata.
 async function discoverSkills() {
   const skills = [];
 
@@ -98,32 +121,26 @@ async function discoverSkills() {
 
     const skillDir = join(SKILLS_DIR, entry.name);
     const skillMdPath = join(skillDir, "SKILL.md");
-    const pluginJsonPath = join(skillDir, ".claude-plugin", "plugin.json");
 
     try {
       const skillMd = await readFile(skillMdPath, "utf-8");
       const frontmatter = parseFrontmatter(skillMd);
-
-      let pluginJson = {};
-      try {
-        const pluginContent = await readFile(pluginJsonPath, "utf-8");
-        pluginJson = JSON.parse(pluginContent);
-      } catch {
-        // Ignore missing or invalid plugin.json
-      }
-
       const metadata = frontmatter.metadata || {};
+      const keywords =
+        typeof metadata.keywords === "string"
+          ? metadata.keywords
+              .split(",")
+              .map((k) => k.trim())
+              .filter(Boolean)
+          : [];
 
       skills.push({
         dirName: entry.name,
         name: frontmatter.name || entry.name,
-        description: frontmatter.description || pluginJson.description || "",
-        license: frontmatter.license || pluginJson.license || "MIT",
-        version: metadata.version || pluginJson.version || "1.0.0",
-        author: pluginJson.author || {},
-        homepage: pluginJson.homepage || "",
-        repository: pluginJson.repository || "",
-        keywords: pluginJson.keywords || [],
+        description: frontmatter.description || "",
+        license: frontmatter.license || "MIT",
+        version: metadata.version || "1.0.0",
+        keywords,
       });
     } catch (error) {
       console.warn(
@@ -143,6 +160,8 @@ function truncate(str, maxLength = 80) {
   return `${str.slice(0, maxLength - 3)}...`;
 }
 
+// Builds a markdown table of skills with links to their directories,
+// used to replace the auto-generated section in README.md.
 function generateReadmeSkillsList(skills) {
   if (skills.length === 0) {
     return "\n*No skills available yet.*\n";
@@ -161,6 +180,8 @@ function generateReadmeSkillsList(skills) {
   return lines.join("\n");
 }
 
+// Replaces the skills table between the START/END markers in README.md
+// with a freshly generated table from the current skills list.
 async function updateReadme(skills) {
   const content = await readFile(README_PATH, "utf-8");
   const startMarker = "<!-- START:Available-Skills -->";
@@ -184,79 +205,172 @@ async function updateReadme(skills) {
   return true;
 }
 
-async function updateMarketplace(skills) {
+// Writes the skills array into manifest.json with name, description,
+// version, source path, license, and keywords for each skill.
+async function updateManifest(manifest, skills) {
+  manifest.skills = skills.map((skill) => ({
+    name: skill.name,
+    description: skill.description,
+    version: skill.version,
+    source: `./skills/${skill.dirName}`,
+    license: skill.license,
+    keywords: skill.keywords,
+  }));
+
+  await writeFile(
+    MANIFEST_PATH,
+    `${JSON.stringify(manifest, null, 2)}\n`,
+    "utf-8"
+  );
+}
+
+// Generates a platform plugin.json at the given path from manifest metadata,
+// creating the directory if it doesn't exist. Extra fields (e.g. logo) are merged in.
+async function updatePlugin(manifest, pluginPath, extraFields = {}) {
+  const pluginJson = {
+    name: manifest.name,
+    description: manifest.description,
+    version: manifest.version,
+    author: manifest.author,
+    homepage: manifest.homepage,
+    repository: manifest.repository,
+    license: manifest.license,
+    keywords: manifest.keywords || [],
+    skills: "./skills/",
+    ...extraFields,
+  };
+
+  await mkdir(dirname(pluginPath), { recursive: true });
+  await writeFile(
+    pluginPath,
+    `${JSON.stringify(pluginJson, null, 2)}\n`,
+    "utf-8"
+  );
+  return true;
+}
+
+// Updates .claude-plugin/marketplace.json with the current manifest
+// metadata so the plugin is discoverable in the Claude marketplace.
+async function updateMarketplace(manifest) {
   let marketplace;
   try {
-    const content = await readFile(MARKETPLACE_PATH, "utf-8");
+    const content = await readFile(CLAUDE_MARKETPLACE_PATH, "utf-8");
     marketplace = JSON.parse(content);
   } catch {
     console.warn("Warning: Could not read marketplace.json");
     return false;
   }
 
-  marketplace.plugins = skills.map((skill) => ({
-    name: `${skill.name}-skill`,
-    description: skill.description,
-    version: skill.version,
-    author: skill.author,
-    source: `./skills/${skill.dirName}`,
-    homepage: skill.homepage,
-    repository: skill.repository,
-    license: skill.license,
-    keywords: skill.keywords,
-  }));
+  marketplace.plugins = [
+    {
+      name: manifest.name,
+      description: manifest.description,
+      version: manifest.version,
+      author: manifest.author,
+      source: "./",
+      homepage: manifest.homepage,
+      repository: manifest.repository,
+      license: manifest.license,
+      keywords: manifest.keywords || [],
+    },
+  ];
 
   await writeFile(
-    MARKETPLACE_PATH,
+    CLAUDE_MARKETPLACE_PATH,
     `${JSON.stringify(marketplace, null, 2)}\n`,
     "utf-8"
   );
   return true;
 }
 
-async function updatePluginJson(skills) {
+// Recursively walks a skill directory and returns all file paths relative
+// to that directory, with SKILL.md sorted first per the RFC spec.
+async function listSkillFiles(skillDir) {
+  const files = [];
+
+  async function walk(dir, prefix) {
+    const entries = await readdir(dir, { withFileTypes: true });
+    for (const entry of entries) {
+      const relativePath = prefix ? `${prefix}/${entry.name}` : entry.name;
+      if (entry.isDirectory()) {
+        await walk(join(dir, entry.name), relativePath);
+      } else {
+        files.push(relativePath);
+      }
+    }
+  }
+
+  await walk(skillDir, "");
+
+  // SKILL.md must be first per the RFC spec
+  files.sort((a, b) => {
+    if (a === "SKILL.md") {
+      return -1;
+    }
+    if (b === "SKILL.md") {
+      return 1;
+    }
+    return a.localeCompare(b);
+  });
+
+  return files;
+}
+
+// Generates skills/index.json following the agent-skills-discovery RFC,
+// listing each skill's name, description, and full file manifest.
+async function updateIndex(skills) {
+  const indexSkills = await Promise.all(
+    skills.map(async (skill) => {
+      const skillDir = join(SKILLS_DIR, skill.dirName);
+      const files = await listSkillFiles(skillDir);
+      return {
+        name: skill.dirName,
+        description: skill.description,
+        files,
+      };
+    })
+  );
+
+  await writeFile(
+    INDEX_PATH,
+    `${JSON.stringify({ skills: indexSkills }, null, 2)}\n`,
+    "utf-8"
+  );
+  return true;
+}
+
+// Propagates author and repository from manifest.json into each
+// skill's SKILL.md frontmatter so they stay in sync.
+async function updateSkillFrontmatter(skills, manifest) {
+  const author = manifest.author?.name || "";
+  const repository = manifest.repository || "";
   let updated = 0;
 
   for (const skill of skills) {
-    const pluginJsonPath = join(
-      SKILLS_DIR,
-      skill.dirName,
-      ".claude-plugin",
-      "plugin.json"
-    );
+    const skillMdPath = join(SKILLS_DIR, skill.dirName, "SKILL.md");
+    let content = await readFile(skillMdPath, "utf-8");
+    const original = content;
 
-    let pluginJson;
-    try {
-      const content = await readFile(pluginJsonPath, "utf-8");
-      pluginJson = JSON.parse(content);
-    } catch {
-      continue;
+    if (author) {
+      content = content.replace(AUTHOR_REGEX, `$1 "${author}"`);
     }
 
-    let changed = false;
-
-    const pluginName = `${skill.name}-skill`;
-    if (pluginJson.name !== pluginName) {
-      pluginJson.name = pluginName;
-      changed = true;
+    if (repository) {
+      if (REPOSITORY_REGEX.test(content)) {
+        content = content.replace(
+          REPOSITORY_CAPTURE_REGEX,
+          `$1 "${repository}"`
+        );
+      } else {
+        content = content.replace(
+          AUTHOR_LINE_REGEX,
+          `$1\n  repository: "${repository}"`
+        );
+      }
     }
 
-    if (pluginJson.description !== skill.description) {
-      pluginJson.description = skill.description;
-      changed = true;
-    }
-
-    if (skill.version && pluginJson.version !== skill.version) {
-      pluginJson.version = skill.version;
-      changed = true;
-    }
-
-    if (changed) {
-      await writeFile(
-        pluginJsonPath,
-        `${JSON.stringify(pluginJson, null, 2)}\n`,
-        "utf-8"
-      );
+    if (content !== original) {
+      await writeFile(skillMdPath, content, "utf-8");
       updated++;
     }
   }
@@ -264,6 +378,8 @@ async function updatePluginJson(skills) {
   return updated;
 }
 
+// Entry point — discovers skills, then updates all generated files
+// (manifest, plugins, marketplace, index, README) in sequence.
 async function main() {
   console.log("Syncing agent skill(s)...\n");
 
@@ -274,22 +390,38 @@ async function main() {
   }
   console.log();
 
-  const pluginCount = await updatePluginJson(skills);
-  if (pluginCount > 0) {
-    console.log(`✓ Updated ${pluginCount} plugin.json file(s)`);
+  const manifest = JSON.parse(await readFile(MANIFEST_PATH, "utf-8"));
+
+  const skillsUpdated = await updateSkillFrontmatter(skills, manifest);
+  if (skillsUpdated > 0) {
+    console.log(`Updated ${skillsUpdated} SKILL.md file(s)`);
+  }
+
+  await updateManifest(manifest, skills);
+  console.log("Updated manifest.json");
+
+  await updatePlugin(manifest, CLAUDE_PLUGIN_PATH);
+  console.log("Updated .claude-plugin/plugin.json");
+
+  const marketplaceUpdated = await updateMarketplace(manifest);
+  if (marketplaceUpdated) {
+    console.log("Updated .claude-plugin/marketplace.json");
+  }
+
+  await updatePlugin(manifest, CURSOR_PLUGIN_PATH);
+  console.log("Updated .cursor-plugin/plugin.json");
+
+  const indexUpdated = await updateIndex(skills);
+  if (indexUpdated) {
+    console.log("Updated skills/index.json");
   }
 
   const readmeUpdated = await updateReadme(skills);
   if (readmeUpdated) {
-    console.log("✓ Updated README.md");
+    console.log("Updated README.md");
   }
 
-  const marketplaceUpdated = await updateMarketplace(skills);
-  if (marketplaceUpdated) {
-    console.log("✓ Updated .claude-plugin/marketplace.json");
-  }
-
-  console.log("\nDone!");
+  console.log("\nSkill Sync Complete!");
 }
 
 main().catch((error) => {
