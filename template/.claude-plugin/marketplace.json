@@ -1,5 +1,5 @@
 {
-  "name": "{Brand_Name}-skills",
+  "name": "{Brand_Name}-agent-skills",
   "description": "{Brand_Name} agent skills",
   "owner": {
     "name": "{Creator_Name}",
@@ -7,18 +7,18 @@
   },
   "metadata": {
     "version": "1.0.0",
-    "description": "Claude Code marketplace of skills by {Brand_Name}"
+    "description": "Claude Code marketplace of agent skills by {Brand_Name}"
   },
   "plugins": [
     {
-      "name": "{Skill_Name}-skill",
-      "description": "{Skill_Description}",
+      "name": "{Brand_Name}-agent-skills",
+      "description": "{Brand_Name} agent skills",
       "version": "1.0.0",
       "author": {
         "name": "{Creator_Name}",
         "email": "{Creator_Email}"
       },
-      "source": "./skills/{Skill_Name}",
+      "source": "./",
       "homepage": "{Skill_Homepage}",
       "repository": "https://github.com/{Skill_Repository}",
       "license": "{Skill_License}",

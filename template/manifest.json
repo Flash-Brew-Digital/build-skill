@@ -1,0 +1,20 @@
+{
+  "name": "{Brand_Name}-agent-skills",
+  "description": "{Brand_Name} agent skills",
+  "version": "1.0.0",
+  "author": { "name": "{Creator_Name}", "email": "{Creator_Email}" },
+  "homepage": "{Skill_Homepage}",
+  "repository": "https://github.com/{Skill_Repository}",
+  "license": "{Skill_License}",
+  "keywords": "{Skill_Keywords}",
+  "skills": [
+    {
+      "name": "{Skill_Name}",
+      "description": "{Skill_Description}",
+      "version": "1.0.0",
+      "source": "./skills/{Skill_Name}",
+      "license": "{Skill_License}",
+      "keywords": "{Skill_Keywords}"
+    }
+  ]
+}

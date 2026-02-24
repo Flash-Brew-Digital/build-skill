@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 
 /**
- * add-skill.js
- *
- * Adds a new skill to the repository.
- *
- * Usage: node scripts/add-skill.js <skill-name> <description>
- *
- * Example: node scripts/add-skill.js my-new-skill "Helps with X tasks"
+ * @module add-skill
+ * @description Scaffolds a new skill directory with a SKILL.md template, then
+ * runs sync-skills.js to register it across all generated files.
+ * @param {string} skill-name - Name of the skill (normalized to lowercase with hyphens).
+ * @param {string} description - Brief description of what the skill does.
+ * @example
+ * node scripts/add-skill.js my-new-skill "Helps with X tasks"
  */
 
 import { mkdir, readFile, writeFile } from "node:fs/promises";
@@ -17,10 +17,8 @@ import { fileURLToPath } from "node:url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT_DIR = join(__dirname, "..");
 const SKILLS_DIR = join(ROOT_DIR, "skills");
-const MARKETPLACE_PATH = join(ROOT_DIR, ".claude-plugin", "marketplace.json");
+const MANIFEST_PATH = join(ROOT_DIR, "manifest.json");
 const SYNC_SCRIPT = join(__dirname, "sync-skills.js");
-
-const SKILLS_SUFFIX_REGEX = /-skills$/;
 
 function normalizeName(input) {
   return input
@@ -45,17 +43,21 @@ Example:
 `);
 }
 
-async function loadMarketplace() {
+// Reads and parses manifest.json, exiting with an error
+// if the file is missing or malformed.
+async function loadManifest() {
   try {
-    const content = await readFile(MARKETPLACE_PATH, "utf-8");
+    const content = await readFile(MANIFEST_PATH, "utf-8");
     return JSON.parse(content);
   } catch {
-    console.error("Error: Could not read .claude-plugin/marketplace.json");
+    console.error("Error: Could not read manifest.json");
     console.error("Make sure you're running this from the repository root.");
     process.exit(1);
   }
 }
 
+// Checks whether a skill directory with a SKILL.md already exists,
+// returning true if so to prevent overwriting.
 async function skillExists(skillName) {
   try {
     await readFile(join(SKILLS_DIR, skillName, "SKILL.md"), "utf-8");
@@ -65,46 +67,27 @@ async function skillExists(skillName) {
   }
 }
 
-function generateSkillMd(skillName, description, marketplace) {
-  const brandName = marketplace.name.replace(SKILLS_SUFFIX_REGEX, "");
-  const license =
-    marketplace.plugins?.[0]?.license || marketplace.license || "MIT";
+// Returns a SKILL.md template string with frontmatter populated
+// from the given skill name, description, and manifest metadata.
+function generateSkillMd(skillName, description, manifest) {
+  const author = manifest.author?.name || "Your Name";
+  const license = manifest.license || "MIT";
 
   return `---
 name: ${skillName}
 description: ${description}
 license: ${license}
 metadata:
-  author: ${brandName}
+  author: ${author}
   version: "1.0.0"
+  keywords: "ai, agent, skill"
 ---
 
 `;
 }
 
-function generatePluginJson(skillName, description, marketplace) {
-  const owner = marketplace.owner || {};
-  const existingPlugin = marketplace.plugins?.[0] || {};
-
-  return JSON.stringify(
-    {
-      name: skillName,
-      description,
-      version: "1.0.0",
-      author: {
-        name: owner.name || "Your Name",
-        email: owner.email || "your.email@example.com",
-      },
-      license: existingPlugin.license || "MIT",
-      homepage: existingPlugin.homepage || "https://example.com",
-      repository: existingPlugin.repository || "",
-      keywords: existingPlugin.keywords || [],
-    },
-    null,
-    2
-  );
-}
-
+// Spawns sync-skills.js as a child process so the new skill
+// is registered in manifest.json, plugins, and README.
 async function runSyncScript() {
   const { spawn } = await import("node:child_process");
 
@@ -126,6 +109,8 @@ async function runSyncScript() {
   });
 }
 
+// Entry point — validates CLI args, scaffolds the skill directory
+// with a SKILL.md template, then runs sync-skills.js.
 async function main() {
   const args = process.argv.slice(2);
 
@@ -157,25 +142,17 @@ async function main() {
 
   console.log(`\nCreating skill: ${skillName}\n`);
 
-  const marketplace = await loadMarketplace();
+  const manifest = await loadManifest();
   const skillDir = join(SKILLS_DIR, skillName);
-  const pluginDir = join(skillDir, ".claude-plugin");
 
-  // Create directories
-  await mkdir(pluginDir, { recursive: true });
+  await mkdir(skillDir, { recursive: true });
 
-  // Generate files
-  const skillMd = generateSkillMd(skillName, description, marketplace);
-  const pluginJson = generatePluginJson(skillName, description, marketplace);
-
+  const skillMd = generateSkillMd(skillName, description, manifest);
   await writeFile(join(skillDir, "SKILL.md"), skillMd, "utf-8");
-  await writeFile(join(pluginDir, "plugin.json"), `${pluginJson}\n`, "utf-8");
 
-  console.log(`✓ Created skills/${skillName}/SKILL.md`);
-  console.log(`✓ Created skills/${skillName}/.claude-plugin/plugin.json`);
+  console.log(`Created skills/${skillName}/SKILL.md`);
   console.log();
 
-  // Run sync script
   console.log("Running sync-skills.js...\n");
   await runSyncScript();
 
@@ -185,7 +162,7 @@ async function main() {
     `  1. Edit skills/${skillName}/SKILL.md to add your skill content`
   );
   console.log(
-    `  2. Update skills/${skillName}/.claude-plugin/plugin.json if needed`
+    "  2. Add keywords to the SKILL.md frontmatter for better discoverability"
   );
   console.log();
 }
