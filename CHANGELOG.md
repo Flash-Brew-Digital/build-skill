@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0](https://github.com/Flash-Brew-Digital/build-skill/compare/v1.3.0...v1.4.0) (2026-02-24)
+
+
+### Features
+
+* adopt evolved project structure into CLI template ([#5](https://github.com/Flash-Brew-Digital/build-skill/issues/5)) ([5c47d20](https://github.com/Flash-Brew-Digital/build-skill/commit/5c47d208b381f1c79711dc91d65f52dba6c130aa))
+
 ## [1.3.0](https://github.com/Flash-Brew-Digital/build-skill/compare/v1.2.0...v1.3.0) (2026-02-17)
 
 
